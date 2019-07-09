@@ -1,31 +1,25 @@
 /**
  * This file is part of Waarp Project.
- * 
- * Copyright 2009, Frederic Bregier, and individual contributors by the @author tags. See the
- * COPYRIGHT.txt in the distribution for a full listing of individual contributors.
- * 
- * All Waarp Project is free software: you can redistribute it and/or modify it under the terms of
- * the GNU General Public License as published by the Free Software Foundation, either version 3 of
- * the License, or (at your option) any later version.
- * 
- * Waarp is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
- * the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
- * Public License for more details.
- * 
+ * <p>
+ * Copyright 2009, Frederic Bregier, and individual contributors by the @author tags. See the COPYRIGHT.txt in the
+ * distribution for a full listing of individual contributors.
+ * <p>
+ * All Waarp Project is free software: you can redistribute it and/or modify it under the terms of the GNU General
+ * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ * <p>
+ * Waarp is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * <p>
  * You should have received a copy of the GNU General Public License along with Waarp . If not, see
  * <http://www.gnu.org/licenses/>.
  */
 package org.waarp.openr66.proxy.configuration;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.List;
-
+import io.netty.handler.traffic.AbstractTrafficShapingHandler;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
-import io.netty.handler.traffic.AbstractTrafficShapingHandler;
 import org.waarp.common.crypto.Des;
 import org.waarp.common.crypto.ssl.WaarpSecureKeyStore;
 import org.waarp.common.crypto.ssl.WaarpSslContextFactory;
@@ -52,11 +46,16 @@ import org.waarp.openr66.protocol.utils.FileUtils;
 import org.waarp.openr66.proxy.network.ProxyEntry;
 import org.waarp.snmp.SnmpConfiguration;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.List;
+
 /**
  * File Based Configuration
- * 
+ *
  * @author frederic bregier
- * 
+ *
  */
 public class FileBasedConfiguration {
     /**
@@ -307,7 +306,7 @@ public class FileBasedConfiguration {
 
     /**
      * Structure of the Configuration file
-     * 
+     *
      */
     private static final XmlDecl[] configIdentityDecls = {
             // identity
@@ -318,7 +317,7 @@ public class FileBasedConfiguration {
     };
     /**
      * Structure of the Configuration file
-     * 
+     *
      */
     private static final XmlDecl[] configServerParamDecls = {
             // server
@@ -338,7 +337,7 @@ public class FileBasedConfiguration {
     };
     /**
      * Structure of the Configuration file
-     * 
+     *
      */
     private static final XmlDecl[] configNetworkProxyDecls = {
             // proxy
@@ -351,19 +350,19 @@ public class FileBasedConfiguration {
     };
     /**
      * Structure of the Configuration file
-     * 
+     *
      */
     private static final XmlDecl[] configNetworkServerDecls = {
             // network
             new XmlDecl(XML_SERVER_PROXY, XmlType.XVAL, XML_SERVER_PROXY, configNetworkProxyDecls,
-                    true),
+                        true),
             new XmlDecl(XmlType.INTEGER, XML_SERVER_HTTPPORT),
             new XmlDecl(XmlType.INTEGER, XML_SERVER_HTTPSPORT)
     };
 
     /**
      * Structure of the Configuration file
-     * 
+     *
      */
     private static final XmlDecl[] configSslDecls = {
             // ssl
@@ -377,7 +376,7 @@ public class FileBasedConfiguration {
 
     /**
      * Structure of the Configuration file
-     * 
+     *
      */
     private static final XmlDecl[] configDirectoryDecls = {
             // directory
@@ -388,7 +387,7 @@ public class FileBasedConfiguration {
 
     /**
      * Structure of the Configuration file
-     * 
+     *
      */
     private static final XmlDecl[] configLimitDecls = {
             // limit
@@ -428,18 +427,19 @@ public class FileBasedConfiguration {
      */
     private static final XmlDecl[] configServer = {
             new XmlDecl(XML_IDENTITY, XmlType.XVAL, XML_ROOT + XML_IDENTITY, configIdentityDecls,
-                    false),
+                        false),
             new XmlDecl(XML_SERVER, XmlType.XVAL, XML_ROOT + XML_SERVER, configServerParamDecls,
-                    false),
+                        false),
             new XmlDecl(XML_NETWORK, XmlType.XVAL, XML_ROOT + XML_NETWORK,
-                    configNetworkServerDecls, false),
+                        configNetworkServerDecls, false),
             new XmlDecl(XML_SSL, XmlType.XVAL, XML_ROOT + XML_SSL, configSslDecls, false),
             new XmlDecl(XML_DIRECTORY, XmlType.XVAL, XML_ROOT + XML_DIRECTORY,
-                    configDirectoryDecls, false),
+                        configDirectoryDecls, false),
             new XmlDecl(XML_LIMIT, XmlType.XVAL, XML_ROOT + XML_LIMIT, configLimitDecls, false)
     };
     private static XmlValue[] configuration = null;
     private static XmlHash hashConfig = null;
+    private static boolean alreadySetLimit = false;
 
     private static boolean loadIdentity(Configuration config) {
         XmlValue value = hashConfig.get(XML_SERVER_HOSTID);
@@ -504,7 +504,7 @@ public class FileBasedConfiguration {
             } catch (Exception e) {
                 logger.error(
                         "Unable to Decrypt Server Password in Config file from: " +
-                                passwd, e);
+                        passwd, e);
                 return false;
             }
         } else {
@@ -521,7 +521,7 @@ public class FileBasedConfiguration {
             } catch (Exception e2) {
                 logger.error(
                         "Unable to Decrypt Server Password in Config file from: " +
-                                skey, e2);
+                        skey, e2);
                 return false;
             }
         }
@@ -543,7 +543,7 @@ public class FileBasedConfiguration {
         }
         try {
             config.setHttpBasePath(FilesystemBasedDirImpl.normalizePath(file.getCanonicalPath()) +
-                    DirInterface.SEPARATOR);
+                                   DirInterface.SEPARATOR);
         } catch (IOException e1) {
             logger.error("Unable to set Http Admin Path in Config file");
             return false;
@@ -579,7 +579,7 @@ public class FileBasedConfiguration {
             }
             try {
                 Configuration.setWaarpSecureKeyStore(new WaarpSecureKeyStore(keypath, keystorepass,
-                        keypass));
+                                                                             keypass));
             } catch (CryptoException e) {
                 logger.error("Bad SecureKeyStore construction for AdminSsl");
                 return false;
@@ -626,29 +626,27 @@ public class FileBasedConfiguration {
         }
         try {
             config.setBaseDirectory(FilesystemBasedDirImpl
-                    .normalizePath(file.getCanonicalPath()));
+                                            .normalizePath(file.getCanonicalPath()));
         } catch (IOException e1) {
             logger.error("Unable to set Home in Config file");
             return false;
         }
         try {
             config.setConfigPath(FilesystemBasedDirImpl
-                    .normalizePath(getSubPath(config, XML_CONFIGPATH)));
+                                         .normalizePath(getSubPath(config, XML_CONFIGPATH)));
         } catch (OpenR66ProtocolSystemException e2) {
             logger.error("Unable to set Config in Config file");
             return false;
         }
         try {
             config.setArchivePath(FilesystemBasedDirImpl
-                    .normalizePath(getSubPath(config, XML_ARCHIVEPATH)));
+                                          .normalizePath(getSubPath(config, XML_ARCHIVEPATH)));
         } catch (OpenR66ProtocolSystemException e2) {
             logger.error("Unable to set Archive in Config file");
             return false;
         }
         return true;
     }
-
-    private static boolean alreadySetLimit = false;
 
     private static boolean loadLimit(Configuration config, boolean updateLimit) {
         if (alreadySetLimit) {
@@ -662,7 +660,7 @@ public class FileBasedConfiguration {
             }
             config.setServerGlobalWriteLimit(config.getServerGlobalReadLimit());
             logger.info("Global Limit: {}",
-                    config.getServerGlobalReadLimit());
+                        config.getServerGlobalReadLimit());
         }
         value = hashConfig.get(XML_LIMITSESSION);
         if (value != null && (!value.isEmpty())) {
@@ -672,10 +670,11 @@ public class FileBasedConfiguration {
             }
             config.setServerChannelWriteLimit(config.getServerChannelReadLimit());
             logger.info("SessionInterface Limit: {}",
-                    config.getServerChannelReadLimit());
+                        config.getServerChannelReadLimit());
         }
-        config.setAnyBandwidthLimitation((config.getServerGlobalReadLimit() > 0 || config.getServerGlobalWriteLimit() > 0 ||
-                config.getServerChannelReadLimit() > 0 || config.getServerChannelWriteLimit() > 0));
+        config.setAnyBandwidthLimitation(
+                (config.getServerGlobalReadLimit() > 0 || config.getServerGlobalWriteLimit() > 0 ||
+                 config.getServerChannelReadLimit() > 0 || config.getServerChannelWriteLimit() > 0));
         config.setDelayLimit(AbstractTrafficShapingHandler.DEFAULT_CHECK_INTERVAL);
         value = hashConfig.get(XML_LIMITDELAY);
         if (value != null && (!value.isEmpty())) {
@@ -684,7 +683,7 @@ public class FileBasedConfiguration {
                 config.setDelayLimit(0);
             }
             logger.info("Delay Limit: {}",
-                    config.getDelayLimit());
+                        config.getDelayLimit());
         }
         value = hashConfig.get(XML_DELAYRETRY);
         if (value != null && (!value.isEmpty())) {
@@ -693,13 +692,13 @@ public class FileBasedConfiguration {
                 config.setDelayRetry(1000);
             }
             logger.info("Delay Retry: {}",
-                    config.getDelayRetry());
+                        config.getDelayRetry());
         }
         if (config.getRUNNER_THREAD() < 10) {
             config.setRUNNER_THREAD(10);
         }
         logger.info("Limit of Runner: {}",
-                config.getRUNNER_THREAD());
+                    config.getRUNNER_THREAD());
         if (DbConstant.admin.isActive() && updateLimit) {
             value = hashConfig.get(XML_SERVER_HOSTID);
             if (value != null && (!value.isEmpty())) {
@@ -769,11 +768,13 @@ public class FileBasedConfiguration {
             limitLowBandwidth = value.getLong();
         }
         if (highcpuLimit > 0) {
-            config.setConstraintLimitHandler(new R66ConstraintLimitHandler(useCpuLimit, useCpuLimitJDK, cpulimit, connlimit,
-                    lowcpuLimit, highcpuLimit, percentageDecrease, null, delay,
-                    limitLowBandwidth));
+            config.setConstraintLimitHandler(
+                    new R66ConstraintLimitHandler(useCpuLimit, useCpuLimitJDK, cpulimit, connlimit,
+                                                  lowcpuLimit, highcpuLimit, percentageDecrease, null, delay,
+                                                  limitLowBandwidth));
         } else {
-            config.setConstraintLimitHandler(new R66ConstraintLimitHandler(useCpuLimit, useCpuLimitJDK, cpulimit, connlimit));
+            config.setConstraintLimitHandler(
+                    new R66ConstraintLimitHandler(useCpuLimit, useCpuLimitJDK, cpulimit, connlimit));
         }
         value = hashConfig.get(XML_SERVER_THREAD);
         if (value != null && (!value.isEmpty())) {
@@ -836,7 +837,7 @@ public class FileBasedConfiguration {
             }
             try {
                 NetworkSslServerInitializer.setWaarpSecureKeyStore(new WaarpSecureKeyStore(keypath, keystorepass,
-                        keypass));
+                                                                                           keypass));
             } catch (CryptoException e) {
                 logger.error("Bad SecureKeyStore construction");
                 return false;
@@ -871,7 +872,7 @@ public class FileBasedConfiguration {
             }
             try {
                 NetworkSslServerInitializer.getWaarpSecureKeyStore().initTrustStore(keypath,
-                        keystorepass, useClientAuthent);
+                                                                                    keystorepass, useClientAuthent);
             } catch (CryptoException e) {
                 logger.error("Bad TrustKeyStore construction");
                 return false;
@@ -955,7 +956,7 @@ public class FileBasedConfiguration {
 
     /**
      * Set the Crypto Key from the Document
-     * 
+     *
      * @param document
      * @return True if OK
      */
@@ -984,7 +985,7 @@ public class FileBasedConfiguration {
 
     /**
      * Load database parameter
-     * 
+     *
      * @param document
      * @return True if OK
      */
@@ -996,7 +997,7 @@ public class FileBasedConfiguration {
     }
 
     /**
-     * 
+     *
      * @param document
      * @param fromXML
      * @return the new subpath
@@ -1027,7 +1028,7 @@ public class FileBasedConfiguration {
 
     /**
      * Initiate the configuration from the xml file for server
-     * 
+     *
      * @param filename
      * @return True if OK
      */

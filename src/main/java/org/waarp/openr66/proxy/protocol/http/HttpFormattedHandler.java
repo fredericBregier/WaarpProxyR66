@@ -1,27 +1,20 @@
 /**
  * This file is part of Waarp Project.
- * 
- * Copyright 2009, Frederic Bregier, and individual contributors by the @author tags. See the
- * COPYRIGHT.txt in the distribution for a full listing of individual contributors.
- * 
- * All Waarp Project is free software: you can redistribute it and/or modify it under the terms of
- * the GNU General Public License as published by the Free Software Foundation, either version 3 of
- * the License, or (at your option) any later version.
- * 
- * Waarp is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
- * the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
- * Public License for more details.
- * 
+ * <p>
+ * Copyright 2009, Frederic Bregier, and individual contributors by the @author tags. See the COPYRIGHT.txt in the
+ * distribution for a full listing of individual contributors.
+ * <p>
+ * All Waarp Project is free software: you can redistribute it and/or modify it under the terms of the GNU General
+ * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ * <p>
+ * Waarp is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * <p>
  * You should have received a copy of the GNU General Public License along with Waarp . If not, see
  * <http://www.gnu.org/licenses/>.
  */
 package org.waarp.openr66.proxy.protocol.http;
-
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -45,7 +38,6 @@ import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
 import io.netty.handler.traffic.TrafficCounter;
-
 import org.waarp.common.exception.FileTransferException;
 import org.waarp.common.exception.InvalidArgumentException;
 import org.waarp.common.logging.WaarpLogger;
@@ -59,89 +51,34 @@ import org.waarp.openr66.protocol.exception.OpenR66ExceptionTrappedFactory;
 import org.waarp.openr66.protocol.exception.OpenR66ProtocolBusinessNoWriteBackException;
 import org.waarp.openr66.proxy.configuration.Configuration;
 
+import java.io.IOException;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * Handler for HTTP information support
- * 
+ *
  * @author Frederic Bregier
- * 
+ *
  */
 public class HttpFormattedHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+    static final int LIMITROW = 60; // better if it can be divided by 4
     /**
      * Internal Logger
      */
     private static final WaarpLogger logger = WaarpLoggerFactory
             .getLogger(HttpFormattedHandler.class);
-
-    private static enum REQUEST {
-        index("index.html"),
-        error("monitoring_header.html", "monitoring_end.html"),
-        statusxml("");
-
-        private String header;
-        private String end;
-
-        /**
-         * Constructor for a unique file
-         * 
-         * @param uniquefile
-         */
-        private REQUEST(String uniquefile) {
-            this.header = uniquefile;
-            this.end = uniquefile;
-        }
-
-        /**
-         * @param header
-         * @param end
-         */
-        private REQUEST(String header, String end) {
-            this.header = header;
-            this.end = end;
-        }
-
-        /**
-         * Reader for a unique file
-         * 
-         * @return the content of the unique file
-         */
-        public String readFileUnique(HttpFormattedHandler handler) {
-            return handler.readFileHeader(Configuration.configuration.getHttpBasePath() + "monitor/"
-                    + this.header);
-        }
-
-        public String readHeader(HttpFormattedHandler handler) {
-            return handler.readFileHeader(Configuration.configuration.getHttpBasePath() + "monitor/"
-                    + this.header);
-        }
-
-        public String readEnd() {
-            return WaarpStringUtils.readFile(Configuration.configuration.getHttpBasePath() + "monitor/"
-                    + this.end);
-        }
-    }
-
-    private static enum REPLACEMENT {
-        XXXHOSTIDXXX, XXXLOCACTIVEXXX, XXXNETACTIVEXXX, XXXBANDWIDTHXXX, XXXDATEXXX, XXXLANGXXX;
-    }
-
-    static final int LIMITROW = 60; // better if it can be divided by 4
     private static final String I18NEXT = "i18next";
-
     final R66Session authentHttp = new R66Session();
-
-    private FullHttpRequest request;
-
     private final StringBuilder responseContent = new StringBuilder();
-
+    private FullHttpRequest request;
     private HttpResponseStatus status;
-
     private String uriRequest;
-
     private String lang = Messages.getSlocale();
-
     private boolean isCurrentRequestXml = false;
     private boolean isCurrentRequestJson = false;
-
     private Map<String, List<String>> params = null;
 
     private String readFileHeader(String filename) {
@@ -158,23 +95,23 @@ public class HttpFormattedHandler extends SimpleChannelInboundHandler<FullHttpRe
         StringBuilder builder = new StringBuilder(value);
 
         WaarpStringUtils.replace(builder, REPLACEMENT.XXXDATEXXX.toString(),
-                (new Date()).toString());
+                                 (new Date()).toString());
         WaarpStringUtils.replace(builder, REPLACEMENT.XXXLOCACTIVEXXX.toString(),
-                Integer.toString(
-                        Configuration.configuration.getLocalTransaction().
-                                getNumberLocalChannel()));
+                                 Integer.toString(
+                                         Configuration.configuration.getLocalTransaction().
+                                                 getNumberLocalChannel()));
         WaarpStringUtils.replace(builder, REPLACEMENT.XXXNETACTIVEXXX.toString(),
-                Integer.toString(
-                        Configuration.configuration.getLocalTransaction().
-                                getNumberLocalChannel()));
+                                 Integer.toString(
+                                         Configuration.configuration.getLocalTransaction().
+                                                 getNumberLocalChannel()));
         WaarpStringUtils.replace(builder, REPLACEMENT.XXXHOSTIDXXX.toString(),
-                Configuration.configuration.getHOST_ID());
+                                 Configuration.configuration.getHOST_ID());
         TrafficCounter trafficCounter =
                 Configuration.configuration.getGlobalTrafficShapingHandler().trafficCounter();
         WaarpStringUtils.replace(builder, REPLACEMENT.XXXBANDWIDTHXXX.toString(),
-                "IN:" + (trafficCounter.lastReadThroughput() / 131072) +
-                        "Mbits&nbsp;&nbsp;OUT:" +
-                        (trafficCounter.lastWriteThroughput() / 131072) + "Mbits");
+                                 "IN:" + (trafficCounter.lastReadThroughput() / 131072) +
+                                 "Mbits&nbsp;&nbsp;OUT:" +
+                                 (trafficCounter.lastWriteThroughput() / 131072) + "Mbits");
         WaarpStringUtils.replace(builder, REPLACEMENT.XXXLANGXXX.toString(), lang);
         return builder.toString();
     }
@@ -202,10 +139,10 @@ public class HttpFormattedHandler extends SimpleChannelInboundHandler<FullHttpRe
         uriRequest = queryStringDecoder.path();
         logger.debug("Msg: " + uriRequest);
         if (uriRequest.contains("gre/") || uriRequest.contains("img/") ||
-                uriRequest.contains("res/") || uriRequest.contains("favicon.ico")) {
+            uriRequest.contains("res/") || uriRequest.contains("favicon.ico")) {
             HttpWriteCacheEnable.writeFile(request,
-                    ctx, Configuration.configuration.getHttpBasePath() + uriRequest,
-                    "XYZR66NOSESSION");
+                                           ctx, Configuration.configuration.getHttpBasePath() + uriRequest,
+                                           "XYZR66NOSESSION");
             return;
         }
         char cval = 'z';
@@ -236,14 +173,14 @@ public class HttpFormattedHandler extends SimpleChannelInboundHandler<FullHttpRe
         } else {
             // Use value 0=Active 1=Error 2=Done 3=All
             switch (cval) {
-                case '5':
-                    statusxml(ctx, nb, extraBoolean);
-                    break;
-                case '7':
-                    statusjson(ctx, nb, extraBoolean);
-                    break;
-                default:
-                    responseContent.append(REQUEST.index.readFileUnique(this));
+            case '5':
+                statusxml(ctx, nb, extraBoolean);
+                break;
+            case '7':
+                statusjson(ctx, nb, extraBoolean);
+                break;
+            default:
+                responseContent.append(REQUEST.index.readFileUnique(this));
             }
         }
         writeResponse(ctx);
@@ -251,7 +188,7 @@ public class HttpFormattedHandler extends SimpleChannelInboundHandler<FullHttpRe
 
     /**
      * print only status
-     * 
+     *
      * @param ctx
      * @param nb
      */
@@ -267,7 +204,7 @@ public class HttpFormattedHandler extends SimpleChannelInboundHandler<FullHttpRe
 
     /**
      * Write the response
-     * 
+     *
      */
     private void writeResponse(ChannelHandlerContext ctx) {
         // Convert the response content to a ByteBuf.
@@ -276,8 +213,9 @@ public class HttpFormattedHandler extends SimpleChannelInboundHandler<FullHttpRe
         // Decide whether to close the connection or not.
         boolean keepAlive = HttpUtil.isKeepAlive(request);
         boolean close = HttpHeaderValues.CLOSE.contentEqualsIgnoreCase(request
-                .headers().get(HttpHeaderNames.CONNECTION)) ||
-                (!keepAlive);
+                                                                               .headers()
+                                                                               .get(HttpHeaderNames.CONNECTION)) ||
+                        (!keepAlive);
 
         // Build the response object.
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, buf);
@@ -291,7 +229,7 @@ public class HttpFormattedHandler extends SimpleChannelInboundHandler<FullHttpRe
         }
         if (keepAlive) {
             response.headers().set(HttpHeaderNames.CONNECTION,
-                    HttpHeaderValues.KEEP_ALIVE);
+                                   HttpHeaderValues.KEEP_ALIVE);
         }
         if (!close) {
             // There's no need to add 'Content-Length' header
@@ -335,14 +273,14 @@ public class HttpFormattedHandler extends SimpleChannelInboundHandler<FullHttpRe
 
     /**
      * Send an error and close
-     * 
+     *
      * @param ctx
      * @param status
      */
     private void sendError(ChannelHandlerContext ctx, HttpResponseStatus status) {
         responseContent.setLength(0);
         responseContent.append(REQUEST.error.readHeader(this)).append("OpenR66 Web Failure: ")
-                .append(status.toString()).append(REQUEST.error.readEnd());
+                       .append(status.toString()).append(REQUEST.error.readEnd());
         ByteBuf buf = Unpooled.copiedBuffer(responseContent.toString(), WaarpStringUtils.UTF8);
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, buf);
         response.headers().add(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
@@ -389,5 +327,57 @@ public class HttpFormattedHandler extends SimpleChannelInboundHandler<FullHttpRe
         if (group != null) {
             group.add(ctx.channel());
         }
+    }
+
+    private static enum REQUEST {
+        index("index.html"),
+        error("monitoring_header.html", "monitoring_end.html"),
+        statusxml("");
+
+        private String header;
+        private String end;
+
+        /**
+         * Constructor for a unique file
+         *
+         * @param uniquefile
+         */
+        private REQUEST(String uniquefile) {
+            this.header = uniquefile;
+            this.end = uniquefile;
+        }
+
+        /**
+         * @param header
+         * @param end
+         */
+        private REQUEST(String header, String end) {
+            this.header = header;
+            this.end = end;
+        }
+
+        /**
+         * Reader for a unique file
+         *
+         * @return the content of the unique file
+         */
+        public String readFileUnique(HttpFormattedHandler handler) {
+            return handler.readFileHeader(Configuration.configuration.getHttpBasePath() + "monitor/"
+                                          + this.header);
+        }
+
+        public String readHeader(HttpFormattedHandler handler) {
+            return handler.readFileHeader(Configuration.configuration.getHttpBasePath() + "monitor/"
+                                          + this.header);
+        }
+
+        public String readEnd() {
+            return WaarpStringUtils.readFile(Configuration.configuration.getHttpBasePath() + "monitor/"
+                                             + this.end);
+        }
+    }
+
+    private static enum REPLACEMENT {
+        XXXHOSTIDXXX, XXXLOCACTIVEXXX, XXXNETACTIVEXXX, XXXBANDWIDTHXXX, XXXDATEXXX, XXXLANGXXX;
     }
 }

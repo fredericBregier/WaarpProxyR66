@@ -1,17 +1,16 @@
 /**
  * This file is part of Waarp Project.
- * 
- * Copyright 2009, Frederic Bregier, and individual contributors by the @author tags. See the
- * COPYRIGHT.txt in the distribution for a full listing of individual contributors.
- * 
- * All Waarp Project is free software: you can redistribute it and/or modify it under the terms of
- * the GNU General Public License as published by the Free Software Foundation, either version 3 of
- * the License, or (at your option) any later version.
- * 
- * Waarp is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
- * the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
- * Public License for more details.
- * 
+ * <p>
+ * Copyright 2009, Frederic Bregier, and individual contributors by the @author tags. See the COPYRIGHT.txt in the
+ * distribution for a full listing of individual contributors.
+ * <p>
+ * All Waarp Project is free software: you can redistribute it and/or modify it under the terms of the GNU General
+ * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ * <p>
+ * Waarp is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * <p>
  * You should have received a copy of the GNU General Public License along with Waarp . If not, see
  * <http://www.gnu.org/licenses/>.
  */
@@ -23,9 +22,9 @@ import org.waarp.openr66.proxy.configuration.Configuration;
 
 /**
  * Proxy bridge between a request and a proxified server
- * 
+ *
  * @author "Frederic Bregier"
- * 
+ *
  */
 public class ProxyBridge {
     public static NetworkTransaction transaction = null;
@@ -34,10 +33,6 @@ public class ProxyBridge {
     private NetworkServerHandler source;
     private NetworkServerHandler proxified;
     private R66Future futureRemoteConnected = new R66Future(true);
-
-    public static void initialize() {
-        transaction = new NetworkTransaction();
-    }
 
     /**
      * @param proxyEntry
@@ -48,9 +43,13 @@ public class ProxyBridge {
         this.source = source;
     }
 
+    public static void initialize() {
+        transaction = new NetworkTransaction();
+    }
+
     public void initializeProxy() {
         Channel proxy = transaction.createConnectionWithRetry(proxyEntry.getRemoteSocketAddress(),
-                proxyEntry.isRemoteSsl());
+                                                              proxyEntry.isRemoteSsl());
         if (proxy == null) {
             // Can't connect ?
             this.futureRemoteConnected.cancel();
@@ -58,7 +57,7 @@ public class ProxyBridge {
         }
         this.proxified =
                 (NetworkServerHandler) proxy.pipeline()
-                        .get(NetworkServerInitializer.HANDLER);
+                                            .get(NetworkServerInitializer.HANDLER);
         this.proxified.setBridge(this);
     }
 

@@ -1,30 +1,20 @@
 /**
  * This file is part of Waarp Project.
- * 
- * Copyright 2009, Frederic Bregier, and individual contributors by the @author tags. See the
- * COPYRIGHT.txt in the distribution for a full listing of individual contributors.
- * 
- * All Waarp Project is free software: you can redistribute it and/or modify it under the terms of
- * the GNU General Public License as published by the Free Software Foundation, either version 3 of
- * the License, or (at your option) any later version.
- * 
- * Waarp is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
- * the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
- * Public License for more details.
- * 
+ * <p>
+ * Copyright 2009, Frederic Bregier, and individual contributors by the @author tags. See the COPYRIGHT.txt in the
+ * distribution for a full listing of individual contributors.
+ * <p>
+ * All Waarp Project is free software: you can redistribute it and/or modify it under the terms of the GNU General
+ * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ * <p>
+ * Waarp is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * <p>
  * You should have received a copy of the GNU General Public License along with Waarp . If not, see
  * <http://www.gnu.org/licenses/>.
  */
 package org.waarp.openr66.proxy.protocol.http.adminssl;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -48,7 +38,6 @@ import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
 import io.netty.handler.traffic.TrafficCounter;
-
 import org.waarp.common.crypto.ssl.WaarpSslUtility;
 import org.waarp.common.exception.FileTransferException;
 import org.waarp.common.exception.InvalidArgumentException;
@@ -67,11 +56,21 @@ import org.waarp.openr66.protocol.utils.R66ShutdownHook;
 import org.waarp.openr66.proxy.configuration.Configuration;
 import org.waarp.openr66.proxy.utils.Version;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * @author Frederic Bregier
- * 
+ *
  */
 public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+    static final int LIMITROW = 48; // better if it can
     /**
      * Internal Logger
      */
@@ -82,61 +81,18 @@ public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest>
      */
     private static final ConcurrentHashMap<String, R66Session> sessions = new ConcurrentHashMap<String, R66Session>();
     private static final Random random = new Random();
-
+    private static final String R66SESSION = "R66SESSION";
+    private static final String I18NEXT = "i18next";
+    private final StringBuilder responseContent = new StringBuilder();
     private R66Session authentHttp = new R66Session();
-
     private FullHttpRequest request;
     private boolean newSession = false;
     private volatile Cookie admin = null;
-    private final StringBuilder responseContent = new StringBuilder();
     private String uriRequest;
     private Map<String, List<String>> params;
     private String lang = Messages.getSlocale();
     private volatile boolean forceClose = false;
     private volatile boolean shutdown = false;
-
-    private static final String R66SESSION = "R66SESSION";
-    private static final String I18NEXT = "i18next";
-
-    private static enum REQUEST {
-        Logon("Logon.html"),
-        index("index.html"),
-        error("error.html"),
-        System("System.html");
-
-        private String header;
-
-        /**
-         * Constructor for a unique file
-         * 
-         * @param uniquefile
-         */
-        private REQUEST(String uniquefile) {
-            this.header = uniquefile;
-        }
-
-        /**
-         * Reader for a unique file
-         * 
-         * @return the content of the unique file
-         */
-        public String readFileUnique(HttpSslHandler handler) {
-            return handler.readFileHeader(Configuration.configuration.getHttpBasePath() + this.header);
-        }
-    }
-
-    private static enum REPLACEMENT {
-        XXXHOSTIDXXX, XXXADMINXXX, XXXVERSIONXXX, XXXBANDWIDTHXXX,
-        XXXXSESSIONLIMITRXXX, XXXXSESSIONLIMITWXXX,
-        XXXXCHANNELLIMITRXXX, XXXXCHANNELLIMITWXXX,
-        XXXXDELAYCOMMDXXX, XXXXDELAYRETRYXXX,
-        XXXLOCALXXX, XXXNETWORKXXX,
-        XXXERRORMESGXXX,
-        XXXLANGXXX, XXXCURLANGENXXX, XXXCURLANGFRXXX, XXXCURSYSLANGENXXX, XXXCURSYSLANGFRXXX;
-    }
-
-    static final int LIMITROW = 48; // better if it can
-                                           // be divided by 4
 
     private String readFileHeader(String filename) {
         String value;
@@ -151,30 +107,31 @@ public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest>
         }
         StringBuilder builder = new StringBuilder(value);
         WaarpStringUtils.replace(builder, REPLACEMENT.XXXLOCALXXX.toString(),
-                Integer.toString(
-                        Configuration.configuration.getLocalTransaction().
-                                getNumberLocalChannel()) + " " + Thread.activeCount());
+                                 Integer.toString(
+                                         Configuration.configuration.getLocalTransaction().
+                                                 getNumberLocalChannel()) + " " + Thread.activeCount());
         WaarpStringUtils.replace(builder, REPLACEMENT.XXXNETWORKXXX.toString(),
-                Integer.toString(
-                        Configuration.configuration.getLocalTransaction().
-                                getNumberLocalChannel()));
+                                 Integer.toString(
+                                         Configuration.configuration.getLocalTransaction().
+                                                 getNumberLocalChannel()));
         WaarpStringUtils.replace(builder, REPLACEMENT.XXXHOSTIDXXX.toString(),
-                Configuration.configuration.getHOST_ID());
+                                 Configuration.configuration.getHOST_ID());
         if (authentHttp.isAuthenticated()) {
             WaarpStringUtils.replace(builder, REPLACEMENT.XXXADMINXXX.toString(),
-                    Messages.getString("HttpSslHandler.1")); //$NON-NLS-1$
+                                     Messages.getString("HttpSslHandler.1")); //$NON-NLS-1$
         } else {
             WaarpStringUtils.replace(builder, REPLACEMENT.XXXADMINXXX.toString(),
-                    Messages.getString("HttpSslHandler.0")); //$NON-NLS-1$
+                                     Messages.getString("HttpSslHandler.0")); //$NON-NLS-1$
         }
         TrafficCounter trafficCounter =
                 Configuration.configuration.getGlobalTrafficShapingHandler().trafficCounter();
         WaarpStringUtils.replace(builder, REPLACEMENT.XXXBANDWIDTHXXX.toString(),
-                Messages.getString("HttpSslHandler.IN") + (trafficCounter.lastReadThroughput() >> 20) + //$NON-NLS-1$
-                Messages.getString("HttpSslHandler.MOPS") + //$NON-NLS-1$
-                Messages.getString("HttpSslHandler.OUT") + //$NON-NLS-1$
-                (trafficCounter.lastWriteThroughput() >> 20) +
-                Messages.getString("HttpSslHandler.MOPS")); //$NON-NLS-1$
+                                 Messages.getString("HttpSslHandler.IN") + (trafficCounter.lastReadThroughput() >> 20) +
+                                 //$NON-NLS-1$
+                                 Messages.getString("HttpSslHandler.MOPS") + //$NON-NLS-1$
+                                 Messages.getString("HttpSslHandler.OUT") + //$NON-NLS-1$
+                                 (trafficCounter.lastWriteThroughput() >> 20) +
+                                 Messages.getString("HttpSslHandler.MOPS")); //$NON-NLS-1$
         WaarpStringUtils.replace(builder, REPLACEMENT.XXXLANGXXX.toString(), lang);
         return builder.toString();
     }
@@ -186,23 +143,24 @@ public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest>
         }
         return value;
     }
+    // be divided by 4
 
     private String index() {
         String index = REQUEST.index.readFileUnique(this);
         StringBuilder builder = new StringBuilder(index);
         WaarpStringUtils.replaceAll(builder, REPLACEMENT.XXXHOSTIDXXX.toString(),
-                Configuration.configuration.getHOST_ID());
+                                    Configuration.configuration.getHOST_ID());
         WaarpStringUtils.replaceAll(builder, REPLACEMENT.XXXADMINXXX.toString(),
-                "Administrator Connected");
+                                    "Administrator Connected");
         WaarpStringUtils.replace(builder, REPLACEMENT.XXXVERSIONXXX.toString(),
-                Version.ID);
+                                 Version.ID);
         return builder.toString();
     }
 
     private String error(String mesg) {
         String index = REQUEST.error.readFileUnique(this);
         return index.replaceAll(REPLACEMENT.XXXERRORMESGXXX.toString(),
-                mesg);
+                                mesg);
     }
 
     private String Logon() {
@@ -211,19 +169,19 @@ public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest>
 
     /**
      * Applied current lang to system page
-     * 
+     *
      * @param builder
      */
     private void langHandle(StringBuilder builder) {
         // i18n: add here any new languages
-        WaarpStringUtils.replace(builder, REPLACEMENT.XXXCURLANGENXXX.name(), lang.equalsIgnoreCase("en") ? "checked"
+        WaarpStringUtils.replace(builder, REPLACEMENT.XXXCURLANGENXXX.name(), lang.equalsIgnoreCase("en")? "checked"
                 : "");
-        WaarpStringUtils.replace(builder, REPLACEMENT.XXXCURLANGFRXXX.name(), lang.equalsIgnoreCase("fr") ? "checked"
+        WaarpStringUtils.replace(builder, REPLACEMENT.XXXCURLANGFRXXX.name(), lang.equalsIgnoreCase("fr")? "checked"
                 : "");
         WaarpStringUtils.replace(builder, REPLACEMENT.XXXCURSYSLANGENXXX.name(),
-                Messages.getSlocale().equalsIgnoreCase("en") ? "checked" : "");
+                                 Messages.getSlocale().equalsIgnoreCase("en")? "checked" : "");
         WaarpStringUtils.replace(builder, REPLACEMENT.XXXCURSYSLANGFRXXX.name(),
-                Messages.getSlocale().equalsIgnoreCase("fr") ? "checked" : "");
+                                 Messages.getSlocale().equalsIgnoreCase("fr")? "checked" : "");
     }
 
     /**
@@ -231,49 +189,49 @@ public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest>
      */
     private void replaceStringSystem(StringBuilder builder) {
         WaarpStringUtils.replace(builder, REPLACEMENT.XXXXSESSIONLIMITWXXX.toString(),
-                Long.toString(Configuration.configuration.getServerChannelWriteLimit()));
+                                 Long.toString(Configuration.configuration.getServerChannelWriteLimit()));
         WaarpStringUtils.replace(builder, REPLACEMENT.XXXXSESSIONLIMITRXXX.toString(),
-                Long.toString(Configuration.configuration.getServerChannelReadLimit()));
+                                 Long.toString(Configuration.configuration.getServerChannelReadLimit()));
         WaarpStringUtils.replace(builder, REPLACEMENT.XXXXDELAYCOMMDXXX.toString(),
-                Long.toString(Configuration.configuration.getDelayCommander()));
+                                 Long.toString(Configuration.configuration.getDelayCommander()));
         WaarpStringUtils.replace(builder, REPLACEMENT.XXXXDELAYRETRYXXX.toString(),
-                Long.toString(Configuration.configuration.getDelayRetry()));
+                                 Long.toString(Configuration.configuration.getDelayRetry()));
         WaarpStringUtils.replace(builder, REPLACEMENT.XXXXCHANNELLIMITWXXX.toString(),
-                Long.toString(Configuration.configuration.getServerGlobalWriteLimit()));
+                                 Long.toString(Configuration.configuration.getServerGlobalWriteLimit()));
         WaarpStringUtils.replace(builder, REPLACEMENT.XXXXCHANNELLIMITRXXX.toString(),
-                Long.toString(Configuration.configuration.getServerGlobalReadLimit()));
-        WaarpStringUtils.replace(builder, "XXXBLOCKXXX", Configuration.configuration.isShutdown() ? "checked" : "");
+                                 Long.toString(Configuration.configuration.getServerGlobalReadLimit()));
+        WaarpStringUtils.replace(builder, "XXXBLOCKXXX", Configuration.configuration.isShutdown()? "checked" : "");
         switch (WaarpLoggerFactory.getLogLevel()) {
-            case DEBUG:
-                WaarpStringUtils.replace(builder, "XXXLEVEL1XXX", "checked");
-                WaarpStringUtils.replace(builder, "XXXLEVEL2XXX", "");
-                WaarpStringUtils.replace(builder, "XXXLEVEL3XXX", "");
-                WaarpStringUtils.replace(builder, "XXXLEVEL4XXX", "");
-                break;
-            case INFO:
-                WaarpStringUtils.replace(builder, "XXXLEVEL1XXX", "");
-                WaarpStringUtils.replace(builder, "XXXLEVEL2XXX", "checked");
-                WaarpStringUtils.replace(builder, "XXXLEVEL3XXX", "");
-                WaarpStringUtils.replace(builder, "XXXLEVEL4XXX", "");
-                break;
-            case WARN:
-                WaarpStringUtils.replace(builder, "XXXLEVEL1XXX", "");
-                WaarpStringUtils.replace(builder, "XXXLEVEL2XXX", "");
-                WaarpStringUtils.replace(builder, "XXXLEVEL3XXX", "checked");
-                WaarpStringUtils.replace(builder, "XXXLEVEL4XXX", "");
-                break;
-            case ERROR:
-                WaarpStringUtils.replace(builder, "XXXLEVEL1XXX", "");
-                WaarpStringUtils.replace(builder, "XXXLEVEL2XXX", "");
-                WaarpStringUtils.replace(builder, "XXXLEVEL3XXX", "");
-                WaarpStringUtils.replace(builder, "XXXLEVEL4XXX", "checked");
-                break;
-            default:
-                WaarpStringUtils.replace(builder, "XXXLEVEL1XXX", "");
-                WaarpStringUtils.replace(builder, "XXXLEVEL2XXX", "");
-                WaarpStringUtils.replace(builder, "XXXLEVEL3XXX", "");
-                WaarpStringUtils.replace(builder, "XXXLEVEL4XXX", "");
-                break;
+        case DEBUG:
+            WaarpStringUtils.replace(builder, "XXXLEVEL1XXX", "checked");
+            WaarpStringUtils.replace(builder, "XXXLEVEL2XXX", "");
+            WaarpStringUtils.replace(builder, "XXXLEVEL3XXX", "");
+            WaarpStringUtils.replace(builder, "XXXLEVEL4XXX", "");
+            break;
+        case INFO:
+            WaarpStringUtils.replace(builder, "XXXLEVEL1XXX", "");
+            WaarpStringUtils.replace(builder, "XXXLEVEL2XXX", "checked");
+            WaarpStringUtils.replace(builder, "XXXLEVEL3XXX", "");
+            WaarpStringUtils.replace(builder, "XXXLEVEL4XXX", "");
+            break;
+        case WARN:
+            WaarpStringUtils.replace(builder, "XXXLEVEL1XXX", "");
+            WaarpStringUtils.replace(builder, "XXXLEVEL2XXX", "");
+            WaarpStringUtils.replace(builder, "XXXLEVEL3XXX", "checked");
+            WaarpStringUtils.replace(builder, "XXXLEVEL4XXX", "");
+            break;
+        case ERROR:
+            WaarpStringUtils.replace(builder, "XXXLEVEL1XXX", "");
+            WaarpStringUtils.replace(builder, "XXXLEVEL2XXX", "");
+            WaarpStringUtils.replace(builder, "XXXLEVEL3XXX", "");
+            WaarpStringUtils.replace(builder, "XXXLEVEL4XXX", "checked");
+            break;
+        default:
+            WaarpStringUtils.replace(builder, "XXXLEVEL1XXX", "");
+            WaarpStringUtils.replace(builder, "XXXLEVEL2XXX", "");
+            WaarpStringUtils.replace(builder, "XXXLEVEL3XXX", "");
+            WaarpStringUtils.replace(builder, "XXXLEVEL4XXX", "");
+            break;
 
         }
     }
@@ -295,7 +253,8 @@ public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest>
                     lang = getTrimValue("change");
                     String sys = getTrimValue("changesys");
                     Messages.init(new Locale(sys));
-                    extraInformation = Messages.getString("HttpSslHandler.LangIs") + "Web: " + lang + " OpenR66: " + Messages.getSlocale(); //$NON-NLS-1$
+                    extraInformation = Messages.getString("HttpSslHandler.LangIs") + "Web: " + lang + " OpenR66: " +
+                                       Messages.getSlocale(); //$NON-NLS-1$
                 } else if (act.equalsIgnoreCase("Level")) {
                     String loglevel = getTrimValue("loglevel");
                     WaarpLogLevel level = WaarpLogLevel.WARN;
@@ -313,7 +272,7 @@ public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest>
                 } else if (act.equalsIgnoreCase("Disconnect")) {
                     String logon = Logon();
                     logon = logon.replaceAll(REPLACEMENT.XXXERRORMESGXXX.toString(),
-                            Messages.getString("HttpSslHandler.DisActive"));
+                                             Messages.getString("HttpSslHandler.DisActive"));
                     newSession = true;
                     clearSession();
                     forceClose = true;
@@ -336,10 +295,14 @@ public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest>
                     if (Configuration.configuration.getShutdownConfiguration().serviceFuture != null) {
                         error = error(Messages.getString("HttpSslHandler.38")); //$NON-NLS-1$
                     } else {
-                        error = error(Messages.getString("HttpSslHandler.39") + (Configuration.configuration.getTIMEOUTCON() * 2 / 1000) + Messages.getString("HttpSslHandler.40")); //$NON-NLS-1$ //$NON-NLS-2$
+                        error = error(Messages.getString("HttpSslHandler.39") +
+                                      (Configuration.configuration.getTIMEOUTCON() * 2 / 1000) +
+                                      Messages.getString("HttpSslHandler.40")); //$NON-NLS-1$ //$NON-NLS-2$
                     }
                     error = error.replace("XXXRELOADHTTPXXX", "HTTP-EQUIV=\"refresh\" CONTENT=\""
-                            + (Configuration.configuration.getTIMEOUTCON() * 2 / 1000) + "\"");
+                                                              +
+                                                              (Configuration.configuration.getTIMEOUTCON() * 2 / 1000) +
+                                                              "\"");
                     R66ShutdownHook.setRestart(true);
                     newSession = true;
                     clearSession();
@@ -437,7 +400,7 @@ public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest>
         if (request.method() == HttpMethod.GET) {
             String logon = Logon();
             logon = logon.replaceAll(REPLACEMENT.XXXERRORMESGXXX.toString(),
-                    "");
+                                     "");
             responseContent.append(logon);
             clearSession();
             writeResponse(ctx);
@@ -447,7 +410,7 @@ public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest>
             if (params == null) {
                 String logon = Logon();
                 logon = logon.replaceAll(REPLACEMENT.XXXERRORMESGXXX.toString(),
-                        Messages.getString("HttpSslHandler.EmptyLogin"));
+                                         Messages.getString("HttpSslHandler.EmptyLogin"));
                 responseContent.append(logon);
                 clearSession();
                 writeResponse(ctx);
@@ -492,14 +455,14 @@ public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest>
             }
             if (!getMenu) {
                 logger.debug("Name=" + name + " vs "
-                        + name.equals(Configuration.configuration.getADMINNAME()) +
-                        " Passwd vs " + Arrays.equals(password.getBytes(WaarpStringUtils.UTF8),
-                                Configuration.configuration.getSERVERADMINKEY()));
+                             + name.equals(Configuration.configuration.getADMINNAME()) +
+                             " Passwd vs " + Arrays.equals(password.getBytes(WaarpStringUtils.UTF8),
+                                                           Configuration.configuration.getSERVERADMINKEY()));
                 if (name.equals(Configuration.configuration.getADMINNAME()) &&
-                        Arrays.equals(password.getBytes(WaarpStringUtils.UTF8),
-                                Configuration.configuration.getSERVERADMINKEY())) {
+                    Arrays.equals(password.getBytes(WaarpStringUtils.UTF8),
+                                  Configuration.configuration.getSERVERADMINKEY())) {
                     authentHttp.getAuth().specialNoSessionAuth(true,
-                            Configuration.configuration.getHOST_ID());
+                                                               Configuration.configuration.getHOST_ID());
                     authentHttp.setStatus(70);
                 } else {
                     getMenu = true;
@@ -516,7 +479,7 @@ public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest>
         if (getMenu) {
             String logon = Logon();
             logon = logon.replaceAll(REPLACEMENT.XXXERRORMESGXXX.toString(),
-                    Messages.getString("HttpSslHandler.BadLogin"));
+                                     Messages.getString("HttpSslHandler.BadLogin"));
             responseContent.append(logon);
             clearSession();
             writeResponse(ctx);
@@ -525,8 +488,8 @@ public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest>
             responseContent.append(index);
             clearSession();
             admin = new DefaultCookie(R66SESSION + Configuration.configuration.getHOST_ID(),
-                    Configuration.configuration.getHOST_ID() +
-                            Long.toHexString(random.nextLong()));
+                                      Configuration.configuration.getHOST_ID() +
+                                      Long.toHexString(random.nextLong()));
             sessions.put(admin.value(), this.authentHttp);
             authentHttp.setStatus(72);
             logger.debug("CreateSession: " + uriRequest + ":{}", admin);
@@ -541,10 +504,10 @@ public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest>
         uriRequest = queryStringDecoder.path();
         logger.debug("Msg: " + uriRequest);
         if (uriRequest.contains("gre/") || uriRequest.contains("img/") ||
-                uriRequest.contains("res/") || uriRequest.contains("favicon.ico")) {
+            uriRequest.contains("res/") || uriRequest.contains("favicon.ico")) {
             HttpWriteCacheEnable.writeFile(request,
-                    ctx, Configuration.configuration.getHttpBasePath() + uriRequest,
-                    R66SESSION + Configuration.configuration.getHOST_ID());
+                                           ctx, Configuration.configuration.getHttpBasePath() + uriRequest,
+                                           R66SESSION + Configuration.configuration.getHOST_ID());
             ctx.flush();
             return;
         }
@@ -567,18 +530,18 @@ public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest>
             logger.debug("NotFound: " + find + ":" + uriRequest);
         }
         switch (req) {
-            case index:
-                responseContent.append(index());
-                break;
-            case Logon:
-                responseContent.append(index());
-                break;
-            case System:
-                responseContent.append(System());
-                break;
-            default:
-                responseContent.append(index());
-                break;
+        case index:
+            responseContent.append(index());
+            break;
+        case Logon:
+            responseContent.append(index());
+            break;
+        case System:
+            responseContent.append(System());
+            break;
+        default:
+            responseContent.append(index());
+            break;
         }
         writeResponse(ctx);
     }
@@ -660,19 +623,20 @@ public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest>
 
     /**
      * Write the response
-     * 
+     *
      */
     private void writeResponse(ChannelHandlerContext ctx) {
         // Convert the response content to a ByteBuf.
         ByteBuf buf = Unpooled.copiedBuffer(responseContent.toString(),
-                WaarpStringUtils.UTF8);
+                                            WaarpStringUtils.UTF8);
         responseContent.setLength(0);
 
         // Decide whether to close the connection or not.
         boolean keepAlive = HttpUtil.isKeepAlive(request);
         boolean close = HttpHeaderValues.CLOSE.contentEqualsIgnoreCase(request
-                .headers().get(HttpHeaderNames.CONNECTION)) ||
-                (!keepAlive) || forceClose;
+                                                                               .headers()
+                                                                               .get(HttpHeaderNames.CONNECTION)) ||
+                        (!keepAlive) || forceClose;
 
         // Build the response object.
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, buf);
@@ -685,7 +649,7 @@ public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest>
             // There's no need to add 'Content-Length' header
             // if this is the last response.
             response.headers().set(HttpHeaderNames.CONTENT_LENGTH,
-                    String.valueOf(buf.readableBytes()));
+                                   String.valueOf(buf.readableBytes()));
         }
 
         handleCookies(response);
@@ -703,7 +667,7 @@ public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest>
 
     /**
      * Send an error and close
-     * 
+     *
      * @param ctx
      * @param status
      */
@@ -713,7 +677,7 @@ public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest>
         FullHttpResponse response = new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1, status,
                 Unpooled.copiedBuffer(responseContent.toString(),
-                        WaarpStringUtils.UTF8));
+                                      WaarpStringUtils.UTF8));
         response.headers().add(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html");
         responseContent.setLength(0);
@@ -749,5 +713,42 @@ public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest>
         Channel channel = ctx.channel();
         Configuration.configuration.getHttpChannelGroup().add(channel);
         super.channelActive(ctx);
+    }
+
+    private static enum REQUEST {
+        Logon("Logon.html"),
+        index("index.html"),
+        error("error.html"),
+        System("System.html");
+
+        private String header;
+
+        /**
+         * Constructor for a unique file
+         *
+         * @param uniquefile
+         */
+        private REQUEST(String uniquefile) {
+            this.header = uniquefile;
+        }
+
+        /**
+         * Reader for a unique file
+         *
+         * @return the content of the unique file
+         */
+        public String readFileUnique(HttpSslHandler handler) {
+            return handler.readFileHeader(Configuration.configuration.getHttpBasePath() + this.header);
+        }
+    }
+
+    private static enum REPLACEMENT {
+        XXXHOSTIDXXX, XXXADMINXXX, XXXVERSIONXXX, XXXBANDWIDTHXXX,
+        XXXXSESSIONLIMITRXXX, XXXXSESSIONLIMITWXXX,
+        XXXXCHANNELLIMITRXXX, XXXXCHANNELLIMITWXXX,
+        XXXXDELAYCOMMDXXX, XXXXDELAYRETRYXXX,
+        XXXLOCALXXX, XXXNETWORKXXX,
+        XXXERRORMESGXXX,
+        XXXLANGXXX, XXXCURLANGENXXX, XXXCURLANGFRXXX, XXXCURSYSLANGENXXX, XXXCURSYSLANGFRXXX;
     }
 }

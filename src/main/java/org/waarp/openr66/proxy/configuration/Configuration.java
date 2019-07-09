@@ -1,30 +1,24 @@
 /**
  * This file is part of Waarp Project.
- * 
- * Copyright 2009, Frederic Bregier, and individual contributors by the @author tags. See the
- * COPYRIGHT.txt in the distribution for a full listing of individual contributors.
- * 
- * All Waarp Project is free software: you can redistribute it and/or modify it under the terms of
- * the GNU General Public License as published by the Free Software Foundation, either version 3 of
- * the License, or (at your option) any later version.
- * 
- * Waarp is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
- * the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
- * Public License for more details.
- * 
+ * <p>
+ * Copyright 2009, Frederic Bregier, and individual contributors by the @author tags. See the COPYRIGHT.txt in the
+ * distribution for a full listing of individual contributors.
+ * <p>
+ * All Waarp Project is free software: you can redistribute it and/or modify it under the terms of the GNU General
+ * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ * <p>
+ * Waarp is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * <p>
  * You should have received a copy of the GNU General Public License along with Waarp . If not, see
  * <http://www.gnu.org/licenses/>.
  */
 package org.waarp.openr66.proxy.configuration;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.group.DefaultChannelGroup;
-
 import org.waarp.common.database.exception.WaarpDatabaseSqlException;
 import org.waarp.common.logging.WaarpLogger;
 import org.waarp.common.logging.WaarpLoggerFactory;
@@ -39,9 +33,13 @@ import org.waarp.openr66.proxy.network.ssl.NetworkSslServerInitializer;
 import org.waarp.openr66.proxy.protocol.http.HttpInitializer;
 import org.waarp.openr66.proxy.protocol.http.adminssl.HttpSslInitializer;
 
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author "Frederic Bregier"
- * 
+ *
  */
 public class Configuration extends org.waarp.openr66.protocol.configuration.Configuration {
     /**
@@ -51,8 +49,8 @@ public class Configuration extends org.waarp.openr66.protocol.configuration.Conf
             .getLogger(Configuration.class);
 
     /**
-	 * 
-	 */
+     *
+     */
     public Configuration() {
         super();
     }
@@ -113,7 +111,7 @@ public class Configuration extends org.waarp.openr66.protocol.configuration.Conf
                     logger.debug("Activation: " + bindNoSSL.localAddress());
                 } else {
                     logger.warn(Messages.getString("Configuration.NOSSLDeactivated")
-                            + " for " + bindNoSSL.localAddress()); //$NON-NLS-1$
+                                + " for " + bindNoSSL.localAddress()); //$NON-NLS-1$
                 }
             }
         } else {
@@ -142,7 +140,7 @@ public class Configuration extends org.waarp.openr66.protocol.configuration.Conf
                     logger.debug("SslActivation: " + bindSSL.localAddress());
                 } else {
                     logger.warn(Messages.getString("Configuration.SSLMODEDeactivated")
-                            + " for " + bindSSL.localAddress()); //$NON-NLS-1$
+                                + " for " + bindSSL.localAddress()); //$NON-NLS-1$
                 }
             }
         } else {
@@ -152,7 +150,6 @@ public class Configuration extends org.waarp.openr66.protocol.configuration.Conf
 
         // Factory for TrafficShapingHandler
         setupLimitHandler();
-
         ProxyBridge.initialize();
         setThriftService(null);
     }
@@ -161,7 +158,7 @@ public class Configuration extends org.waarp.openr66.protocol.configuration.Conf
     public void startHttpSupport() {
         // Now start the HTTP support
         logger.info(Messages.getString("Configuration.HTTPStart") + getSERVER_HTTPPORT() + //$NON-NLS-1$
-                " HTTPS: " + getSERVER_HTTPSPORT());
+                    " HTTPS: " + getSERVER_HTTPSPORT());
         httpChannelGroup = new DefaultChannelGroup("HttpOpenR66", subTaskGroup.next());
         // Configure the server.
         httpBootstrap = new ServerBootstrap();
@@ -170,7 +167,8 @@ public class Configuration extends org.waarp.openr66.protocol.configuration.Conf
         httpBootstrap.childHandler(new HttpInitializer(isUseHttpCompression()));
         // Bind and start to accept incoming connections.
         if (getSERVER_HTTPPORT() > 0) {
-            ChannelFuture future = httpBootstrap.bind(new InetSocketAddress(getSERVER_HTTPPORT())).awaitUninterruptibly();
+            ChannelFuture future =
+                    httpBootstrap.bind(new InetSocketAddress(getSERVER_HTTPPORT())).awaitUninterruptibly();
             if (future.isSuccess()) {
                 httpChannelGroup.add(future.channel());
             }
@@ -183,7 +181,8 @@ public class Configuration extends org.waarp.openr66.protocol.configuration.Conf
         httpsBootstrap.childHandler(new HttpSslInitializer(isUseHttpCompression()));
         // Bind and start to accept incoming connections.
         if (getSERVER_HTTPSPORT() > 0) {
-            ChannelFuture future = httpsBootstrap.bind(new InetSocketAddress(getSERVER_HTTPSPORT())).awaitUninterruptibly();
+            ChannelFuture future =
+                    httpsBootstrap.bind(new InetSocketAddress(getSERVER_HTTPSPORT())).awaitUninterruptibly();
             if (future.isSuccess()) {
                 httpChannelGroup.add(future.channel());
             }

@@ -1,31 +1,26 @@
 /**
  * This file is part of Waarp Project.
- * 
- * Copyright 2009, Frederic Bregier, and individual contributors by the @author tags. See the
- * COPYRIGHT.txt in the distribution for a full listing of individual contributors.
- * 
- * All Waarp Project is free software: you can redistribute it and/or modify it under the terms of
- * the GNU General Public License as published by the Free Software Foundation, either version 3 of
- * the License, or (at your option) any later version.
- * 
- * Waarp is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
- * the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
- * Public License for more details.
- * 
+ * <p>
+ * Copyright 2009, Frederic Bregier, and individual contributors by the @author tags. See the COPYRIGHT.txt in the
+ * distribution for a full listing of individual contributors.
+ * <p>
+ * All Waarp Project is free software: you can redistribute it and/or modify it under the terms of the GNU General
+ * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ * <p>
+ * Waarp is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * <p>
  * You should have received a copy of the GNU General Public License along with Waarp . If not, see
  * <http://www.gnu.org/licenses/>.
  */
 package org.waarp.openr66.proxy.network;
-
-import java.net.BindException;
-import java.net.SocketAddress;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.handler.timeout.ReadTimeoutException;
-
 import org.waarp.common.crypto.ssl.WaarpSslUtility;
 import org.waarp.common.logging.WaarpLogger;
 import org.waarp.common.logging.WaarpLoggerFactory;
@@ -45,9 +40,12 @@ import org.waarp.openr66.protocol.utils.ChannelUtils;
 import org.waarp.openr66.protocol.utils.R66Future;
 import org.waarp.openr66.proxy.configuration.Configuration;
 
+import java.net.BindException;
+import java.net.SocketAddress;
+
 /**
  * Network Server Handler (Requester side)
- * 
+ *
  * @author frederic bregier
  */
 public class NetworkServerHandler extends SimpleChannelInboundHandler<NetworkPacket> {
@@ -56,7 +54,18 @@ public class NetworkServerHandler extends SimpleChannelInboundHandler<NetworkPac
      * Internal Logger
      */
     private static final WaarpLogger logger = WaarpLoggerFactory.getLogger(NetworkServerHandler.class);
-
+    /**
+     * Does this Handler is for SSL
+     */
+    protected volatile boolean isSSL = false;
+    /**
+     * Is this Handler a server side
+     */
+    protected boolean isServer = false;
+    /**
+     * Future to wait for Client to be setup
+     */
+    protected volatile R66Future clientFuture;
     /**
      * The underlying Network Channel
      */
@@ -74,24 +83,12 @@ public class NetworkServerHandler extends SimpleChannelInboundHandler<NetworkPac
      */
     private volatile SocketAddress localAddress;
     /**
-     * Does this Handler is for SSL
-     */
-    protected volatile boolean isSSL = false;
-    /**
-     * Is this Handler a server side
-     */
-    protected boolean isServer = false;
-    /**
      * To handle the keep alive
      */
     private volatile int keepAlivedSent = 0;
-    /**
-     * Future to wait for Client to be setup
-     */
-    protected volatile R66Future clientFuture;
 
     /**
-     * 
+     *
      * @param isServer
      */
     public NetworkServerHandler(boolean isServer) {
@@ -108,8 +105,8 @@ public class NetworkServerHandler extends SimpleChannelInboundHandler<NetworkPac
         }
         this.clientFuture.setSuccess();
         logger.debug("setBridge: " + isServer + " "
-                + (bridge != null ? bridge.getProxyEntry().toString()
-                        + " proxyChannelId: " + this.proxyChannel.id() : "nobridge"));
+                     + (bridge != null? bridge.getProxyEntry().toString()
+                                        + " proxyChannelId: " + this.proxyChannel.id() : "nobridge"));
     }
 
     /**
@@ -152,8 +149,8 @@ public class NetworkServerHandler extends SimpleChannelInboundHandler<NetworkPac
             }
             this.proxyChannel = this.bridge.getProxified().networkChannel;
             logger.warn("Connected: " + isServer + " "
-                    + (bridge != null ? bridge.getProxyEntry().toString()
-                            + " proxyChannelId: " + this.proxyChannel.id() : "nobridge"));
+                        + (bridge != null? bridge.getProxyEntry().toString()
+                                           + " proxyChannelId: " + this.proxyChannel.id() : "nobridge"));
         } else {
             try {
                 this.clientFuture.await(Configuration.configuration.getTIMEOUTCON());
@@ -171,8 +168,9 @@ public class NetworkServerHandler extends SimpleChannelInboundHandler<NetworkPac
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-        if (Configuration.configuration.isShutdown())
+        if (Configuration.configuration.isShutdown()) {
             return;
+        }
         if (evt instanceof IdleStateEvent) {
             if (keepAlivedSent > 0) {
                 if (keepAlivedSent < 5) {
@@ -191,7 +189,7 @@ public class NetworkServerHandler extends SimpleChannelInboundHandler<NetworkPac
                 KeepAlivePacket keepAlivePacket = new KeepAlivePacket();
                 NetworkPacket response =
                         new NetworkPacket(ChannelUtils.NOCHANNEL,
-                                ChannelUtils.NOCHANNEL, keepAlivePacket, null);
+                                          ChannelUtils.NOCHANNEL, keepAlivePacket, null);
                 logger.info("Write KAlive");
                 ctx.channel().writeAndFlush(response);
             }
@@ -216,10 +214,10 @@ public class NetworkServerHandler extends SimpleChannelInboundHandler<NetworkPac
                 // No way to know what is wrong: close all connections with
                 // remote host
                 logger.error("Will close NETWORK channel, Cannot continue connection with remote Host: "
-                        +
-                        packet.toString() +
-                        " : " +
-                        ctx.channel().remoteAddress());
+                             +
+                             packet.toString() +
+                             " : " +
+                             ctx.channel().remoteAddress());
                 WaarpSslUtility.closingSslChannel(ctx.channel());
                 packet.clear();
                 return;
@@ -233,7 +231,7 @@ public class NetworkServerHandler extends SimpleChannelInboundHandler<NetworkPac
                     keepAlivePacket.validate();
                     NetworkPacket response =
                             new NetworkPacket(ChannelUtils.NOCHANNEL,
-                                    ChannelUtils.NOCHANNEL, keepAlivePacket, null);
+                                              ChannelUtils.NOCHANNEL, keepAlivePacket, null);
                     logger.info("Answer KAlive");
                     ctx.channel().writeAndFlush(response);
                 } else {
@@ -260,7 +258,7 @@ public class NetworkServerHandler extends SimpleChannelInboundHandler<NetworkPac
             ReadTimeoutException exception = (ReadTimeoutException) cause;
             // No read for too long
             logger.error("ReadTimeout so Will close NETWORK channel {}", exception.getClass().getName() + " : "
-                    + exception.getMessage());
+                                                                         + exception.getMessage());
             ChannelCloseTimer.closeFutureChannel(channel);
             return;
         }
@@ -279,7 +277,7 @@ public class NetworkServerHandler extends SimpleChannelInboundHandler<NetworkPac
                 return;
             } else if (exception instanceof OpenR66ProtocolNoConnectionException) {
                 logger.debug("Connection impossible with NETWORK channel {}",
-                        exception.getMessage());
+                             exception.getMessage());
                 channel.close();
                 return;
             } else {
@@ -290,10 +288,10 @@ public class NetworkServerHandler extends SimpleChannelInboundHandler<NetworkPac
             final ConnectionErrorPacket errorPacket = new ConnectionErrorPacket(
                     exception.getMessage(), null);
             writeError(channel, ChannelUtils.NOCHANNEL,
-                    ChannelUtils.NOCHANNEL, errorPacket);
+                       ChannelUtils.NOCHANNEL, errorPacket);
             if (proxyChannel != null) {
                 writeError(proxyChannel, ChannelUtils.NOCHANNEL,
-                        ChannelUtils.NOCHANNEL, errorPacket);
+                           ChannelUtils.NOCHANNEL, errorPacket);
             }
             logger.debug("Will close NETWORK channel: {}", exception.getMessage());
             ChannelCloseTimer.closeFutureChannel(channel);
@@ -305,14 +303,14 @@ public class NetworkServerHandler extends SimpleChannelInboundHandler<NetworkPac
 
     /**
      * Write error back to remote client
-     * 
+     *
      * @param channel
      * @param remoteId
      * @param localId
      * @param error
      */
     void writeError(Channel channel, Integer remoteId, Integer localId,
-            AbstractLocalPacket error) {
+                    AbstractLocalPacket error) {
         NetworkPacket networkPacket = null;
         try {
             networkPacket = new NetworkPacket(localId, remoteId, error, null);
@@ -327,7 +325,7 @@ public class NetworkServerHandler extends SimpleChannelInboundHandler<NetworkPac
     }
 
     /**
-     * 
+     *
      * @return True if this Handler is for SSL
      */
     public boolean isSsl() {
