@@ -24,7 +24,6 @@ import org.waarp.openr66.proxy.configuration.Configuration;
  * Proxy bridge between a request and a proxified server
  *
  * @author "Frederic Bregier"
- *
  */
 public class ProxyBridge {
     public static NetworkTransaction transaction = null;

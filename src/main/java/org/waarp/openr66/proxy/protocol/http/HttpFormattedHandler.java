@@ -61,7 +61,6 @@ import java.util.Set;
  * Handler for HTTP information support
  *
  * @author Frederic Bregier
- *
  */
 public class HttpFormattedHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     static final int LIMITROW = 60; // better if it can be divided by 4
@@ -204,7 +203,6 @@ public class HttpFormattedHandler extends SimpleChannelInboundHandler<FullHttpRe
 
     /**
      * Write the response
-     *
      */
     private void writeResponse(ChannelHandlerContext ctx) {
         // Convert the response content to a ByteBuf.

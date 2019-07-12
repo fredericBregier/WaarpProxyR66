@@ -22,9 +22,6 @@ import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.handler.traffic.ChannelTrafficShapingHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
-
-import org.waarp.openr66.protocol.exception.OpenR66ProtocolNoDataException;
-import org.waarp.openr66.protocol.networkhandler.GlobalTrafficHandler;
 import org.waarp.openr66.proxy.configuration.Configuration;
 import org.waarp.openr66.proxy.network.NetworkPacketCodec;
 import org.waarp.openr66.proxy.network.NetworkServerInitializer;
@@ -33,14 +30,11 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author Frederic Bregier
- *
  */
 public class NetworkSslServerInitializer extends
                                          org.waarp.openr66.protocol.networkhandler.ssl.NetworkSslServerInitializer {
     /**
-     *
-     * @param isClient
-     *            True if this Factory is to be used in Client mode
+     * @param isClient True if this Factory is to be used in Client mode
      */
     public NetworkSslServerInitializer(boolean isClient) {
         super(isClient);
@@ -64,7 +58,8 @@ public class NetworkSslServerInitializer extends
 
         pipeline.addLast("codec", new NetworkPacketCodec());
         pipeline.addLast(NetworkServerInitializer.TIMEOUT,
-                new IdleStateHandler(0, 0, Configuration.configuration.getTIMEOUTCON(), TimeUnit.MILLISECONDS));
+                         new IdleStateHandler(0, 0, Configuration.configuration.getTIMEOUTCON(),
+                                              TimeUnit.MILLISECONDS));
 
         GlobalTrafficShapingHandler handler =
                 Configuration.configuration.getGlobalTrafficShapingHandler();
@@ -72,10 +67,10 @@ public class NetworkSslServerInitializer extends
             pipeline.addLast(NetworkServerInitializer.LIMITGLOBAL, handler);
         }
         pipeline.addLast(NetworkServerInitializer.LIMITCHANNEL,
-                new ChannelTrafficShapingHandler(
-                    Configuration.configuration.getServerChannelWriteLimit(),
-                    Configuration.configuration.getServerChannelReadLimit(),
-                    Configuration.configuration.getDelayLimit()));
+                         new ChannelTrafficShapingHandler(
+                                 Configuration.configuration.getServerChannelWriteLimit(),
+                                 Configuration.configuration.getServerChannelReadLimit(),
+                                 Configuration.configuration.getDelayLimit()));
         pipeline.addLast(Configuration.configuration.getHandlerGroup(),
                          NetworkServerInitializer.HANDLER, new NetworkSslServerHandler(
                         !this.isClient));

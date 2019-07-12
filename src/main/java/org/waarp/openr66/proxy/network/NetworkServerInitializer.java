@@ -21,9 +21,6 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.handler.traffic.ChannelTrafficShapingHandler;
 import io.netty.handler.traffic.GlobalTrafficShapingHandler;
-
-import org.waarp.openr66.protocol.exception.OpenR66ProtocolNoDataException;
-import org.waarp.openr66.protocol.networkhandler.GlobalTrafficHandler;
 import org.waarp.openr66.proxy.configuration.Configuration;
 
 import java.util.concurrent.TimeUnit;
@@ -45,17 +42,17 @@ public class NetworkServerInitializer extends
         final ChannelPipeline pipeline = ch.pipeline();
         pipeline.addLast("codec", new NetworkPacketCodec());
         pipeline.addLast(TIMEOUT, new IdleStateHandler(0, 0, Configuration.configuration.getTIMEOUTCON(),
-                TimeUnit.MILLISECONDS));
+                                                       TimeUnit.MILLISECONDS));
         GlobalTrafficShapingHandler handler =
                 Configuration.configuration.getGlobalTrafficShapingHandler();
         if (handler != null) {
             pipeline.addLast(LIMITGLOBAL, handler);
         }
         pipeline.addLast(LIMITCHANNEL,
-                new ChannelTrafficShapingHandler(
-                    Configuration.configuration.getServerChannelWriteLimit(),
-                    Configuration.configuration.getServerChannelReadLimit(),
-                    Configuration.configuration.getDelayLimit()));
+                         new ChannelTrafficShapingHandler(
+                                 Configuration.configuration.getServerChannelWriteLimit(),
+                                 Configuration.configuration.getServerChannelReadLimit(),
+                                 Configuration.configuration.getDelayLimit()));
         pipeline.addLast(Configuration.configuration.getHandlerGroup(),
                          HANDLER, new NetworkServerHandler(this.server));
     }

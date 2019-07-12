@@ -30,7 +30,6 @@ import org.waarp.openr66.proxy.network.NetworkServerHandler;
 
 /**
  * @author Frederic Bregier
- *
  */
 public class NetworkSslServerHandler extends NetworkServerHandler {
     /**
@@ -47,8 +46,8 @@ public class NetworkSslServerHandler extends NetworkServerHandler {
     }
 
     /**
-     *
      * @param channel
+     *
      * @return True if the SSL handshake is over and OK, else False
      */
     public static boolean isSslConnectedChannel(Channel channel) {

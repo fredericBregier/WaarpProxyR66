@@ -82,6 +82,7 @@ public class NetworkTransaction {
      *
      * @param socketAddress
      * @param isSSL
+     *
      * @return the Channel
      */
     public Channel createConnectionWithRetry(SocketAddress socketAddress,
@@ -124,7 +125,9 @@ public class NetworkTransaction {
      *
      * @param socketAddress
      * @param isSSL
+     *
      * @return the channel
+     *
      * @throws OpenR66ProtocolNetworkException
      * @throws OpenR66ProtocolRemoteShutdownException
      * @throws OpenR66ProtocolNoConnectionException
@@ -169,10 +172,11 @@ public class NetworkTransaction {
     }
 
     /**
-     *
      * @param socketServerAddress
      * @param isSSL
+     *
      * @return the channel
+     *
      * @throws OpenR66ProtocolNetworkException
      * @throws OpenR66ProtocolRemoteShutdownException
      * @throws OpenR66ProtocolNoConnectionException

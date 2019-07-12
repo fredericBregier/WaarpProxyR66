@@ -24,7 +24,6 @@ import org.waarp.common.logging.WaarpLogger;
 import org.waarp.common.logging.WaarpLoggerFactory;
 import org.waarp.common.utility.WaarpNettyUtil;
 import org.waarp.openr66.protocol.configuration.Messages;
-import org.waarp.openr66.protocol.networkhandler.GlobalTrafficHandler;
 import org.waarp.openr66.protocol.utils.R66ShutdownHook;
 import org.waarp.openr66.proxy.network.NetworkServerInitializer;
 import org.waarp.openr66.proxy.network.ProxyBridge;
@@ -39,7 +38,6 @@ import java.util.List;
 
 /**
  * @author "Frederic Bregier"
- *
  */
 public class Configuration extends org.waarp.openr66.protocol.configuration.Configuration {
     /**

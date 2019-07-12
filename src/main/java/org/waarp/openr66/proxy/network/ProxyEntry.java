@@ -23,8 +23,8 @@ import java.util.HashMap;
 
 /**
  * Proxy Entry
- * @author "Frederic Bregier"
  *
+ * @author "Frederic Bregier"
  */
 public class ProxyEntry {
     public static final HashMap<String, ProxyEntry> proxyEntries = new HashMap<String, ProxyEntry>();

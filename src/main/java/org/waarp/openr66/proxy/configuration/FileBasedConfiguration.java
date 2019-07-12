@@ -55,7 +55,6 @@ import java.util.List;
  * File Based Configuration
  *
  * @author frederic bregier
- *
  */
 public class FileBasedConfiguration {
     /**
@@ -306,7 +305,6 @@ public class FileBasedConfiguration {
 
     /**
      * Structure of the Configuration file
-     *
      */
     private static final XmlDecl[] configIdentityDecls = {
             // identity
@@ -317,7 +315,6 @@ public class FileBasedConfiguration {
     };
     /**
      * Structure of the Configuration file
-     *
      */
     private static final XmlDecl[] configServerParamDecls = {
             // server
@@ -337,7 +334,6 @@ public class FileBasedConfiguration {
     };
     /**
      * Structure of the Configuration file
-     *
      */
     private static final XmlDecl[] configNetworkProxyDecls = {
             // proxy
@@ -350,7 +346,6 @@ public class FileBasedConfiguration {
     };
     /**
      * Structure of the Configuration file
-     *
      */
     private static final XmlDecl[] configNetworkServerDecls = {
             // network
@@ -362,7 +357,6 @@ public class FileBasedConfiguration {
 
     /**
      * Structure of the Configuration file
-     *
      */
     private static final XmlDecl[] configSslDecls = {
             // ssl
@@ -376,7 +370,6 @@ public class FileBasedConfiguration {
 
     /**
      * Structure of the Configuration file
-     *
      */
     private static final XmlDecl[] configDirectoryDecls = {
             // directory
@@ -387,7 +380,6 @@ public class FileBasedConfiguration {
 
     /**
      * Structure of the Configuration file
-     *
      */
     private static final XmlDecl[] configLimitDecls = {
             // limit
@@ -704,7 +696,6 @@ public class FileBasedConfiguration {
             if (value != null && (!value.isEmpty())) {
                 config.setHOST_ID(value.getString());
                 DbConfiguration configuration = new DbConfiguration(
-                        DbConstant.admin.getSession(),
                         config.getHOST_ID(),
                         config.getServerGlobalReadLimit(),
                         config.getServerGlobalWriteLimit(),
@@ -957,7 +948,8 @@ public class FileBasedConfiguration {
     /**
      * Set the Crypto Key from the Document
      *
-     * @param document
+     * @param config
+     *
      * @return True if OK
      */
     private static boolean setCryptoKey(Configuration config) {
@@ -986,7 +978,8 @@ public class FileBasedConfiguration {
     /**
      * Load database parameter
      *
-     * @param document
+     * @param config
+     *
      * @return True if OK
      */
     private static boolean loadDatabase(Configuration config) {
@@ -997,10 +990,11 @@ public class FileBasedConfiguration {
     }
 
     /**
-     *
-     * @param document
+     * @param config
      * @param fromXML
+     *
      * @return the new subpath
+     *
      * @throws OpenR66ProtocolSystemException
      */
     private static String getSubPath(Configuration config, String fromXML)
@@ -1030,6 +1024,7 @@ public class FileBasedConfiguration {
      * Initiate the configuration from the xml file for server
      *
      * @param filename
+     *
      * @return True if OK
      */
     public static boolean setConfigurationProxyFromXml(Configuration config, String filename) {

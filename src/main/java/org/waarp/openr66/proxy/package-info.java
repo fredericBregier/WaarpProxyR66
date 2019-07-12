@@ -17,6 +17,9 @@
  * Proxy package for R66 protocol
  *
  * @author "Frederic Bregier"
+ * <p>
+ * Proxy package for R66 protocol
+ * @author "Frederic Bregier"
  */
 /**
  * Proxy package for R66 protocol

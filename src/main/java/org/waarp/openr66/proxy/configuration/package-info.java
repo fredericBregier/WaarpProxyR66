@@ -17,6 +17,9 @@
  * Specific configuration package
  *
  * @author "Frederic Bregier"
+ * <p>
+ * Specific configuration package
+ * @author "Frederic Bregier"
  */
 /**
  * Specific configuration package

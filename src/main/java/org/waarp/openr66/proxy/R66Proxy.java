@@ -25,7 +25,6 @@ import org.waarp.openr66.proxy.configuration.FileBasedConfiguration;
 
 /**
  * @author "Frederic Bregier"
- *
  */
 public class R66Proxy {
     private static WaarpLogger logger;

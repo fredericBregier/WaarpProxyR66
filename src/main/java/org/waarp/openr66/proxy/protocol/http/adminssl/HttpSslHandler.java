@@ -67,7 +67,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Frederic Bregier
- *
  */
 public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     static final int LIMITROW = 48; // better if it can
@@ -623,7 +622,6 @@ public class HttpSslHandler extends SimpleChannelInboundHandler<FullHttpRequest>
 
     /**
      * Write the response
-     *
      */
     private void writeResponse(ChannelHandlerContext ctx) {
         // Convert the response content to a ByteBuf.

@@ -17,6 +17,9 @@
  * Network Package for Proxy R66
  *
  * @author "Frederic Bregier"
+ * <p>
+ * Network Package for Proxy R66
+ * @author "Frederic Bregier"
  */
 /**
  * Network Package for Proxy R66
