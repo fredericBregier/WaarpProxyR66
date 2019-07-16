@@ -25,6 +25,7 @@ import io.netty.channel.group.DefaultChannelGroup;
 import org.waarp.common.database.exception.WaarpDatabaseSqlException;
 import org.waarp.common.logging.WaarpLogger;
 import org.waarp.common.logging.WaarpLoggerFactory;
+import org.waarp.common.utility.DetectionUtils;
 import org.waarp.common.utility.WaarpNettyUtil;
 import org.waarp.openr66.protocol.configuration.Messages;
 import org.waarp.openr66.protocol.utils.R66ShutdownHook;
@@ -74,6 +75,7 @@ public class Configuration
       logger.error(
           "OpenR66 has neither NOSSL nor SSL support included! Stop here!");
       System.exit(-1);
+      return;
     }
     pipelineInit();
     serverPipelineInit();

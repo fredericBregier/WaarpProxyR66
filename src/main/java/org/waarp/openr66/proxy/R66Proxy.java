@@ -22,6 +22,7 @@ package org.waarp.openr66.proxy;
 import org.waarp.common.logging.WaarpLogger;
 import org.waarp.common.logging.WaarpLoggerFactory;
 import org.waarp.common.logging.WaarpSlf4JLoggerFactory;
+import org.waarp.common.utility.DetectionUtils;
 import org.waarp.openr66.protocol.utils.R66ShutdownHook;
 import org.waarp.openr66.proxy.configuration.Configuration;
 import org.waarp.openr66.proxy.configuration.FileBasedConfiguration;
